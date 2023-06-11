@@ -4,6 +4,8 @@ let streak = 0;
 let max_streak = 0;
 let best_time = 99.999;
 
+let timeouts = [];
+
 let mode = 5;
 let mode_data = {};
 mode_data[5] = [8, '92px'];
@@ -129,113 +131,142 @@ function addListeners(){
     });
 }
 
-function check(){
-    if(wrong === 1){
-        resetTimer();
-        game_started = false;
-        streak = 0;
-
-        good_positions.forEach( pos => {
-            blocks[pos].classList.add('proper');
-        });
-        return;
-    }
-    if(right === mode_data[mode][0]){
-        stopTimer();
-        streak++;
-        if(streak > max_streak){
-            max_streak = streak;
-            document.cookie = "max-streak_thermite="+max_streak;
-        }
-        let time = document.querySelector('.streaks .time').innerHTML;
-        if(parseFloat(time) < best_time){
-            best_time = parseFloat(time);
-            document.cookie = "best-time_thermite="+best_time;
-        }
-        let leaderboard = new XMLHttpRequest();
-        leaderboard.open("HEAD", 'streak.php?streak='+streak+'&max_streak='+max_streak
-            +'&speed='+speed+'&mode='+mode+'&time='+time);
-        leaderboard.send();
-        reset();
-    }
-}
-
-function reset(){
+function reset() {
     game_started = false;
-
+  
     resetTimer();
     clearTimeout(timer_start);
     clearTimeout(timer_game);
     clearTimeout(timer_finish);
-
+  
     document.querySelector('.splash').classList.remove('hidden');
     document.querySelector('.groups').classList.add('hidden');
-
-    document.querySelectorAll('.group').forEach(el => { el.remove(); });
+  
+    document.querySelectorAll('.group').forEach(el => {
+      el.remove();
+    });
     speed = document.querySelector('#speed').value;
     expectedNumber = 1;
-
+  
+    // Clear the stored timeouts
+    timeouts.forEach(timeoutId => {
+      clearTimeout(timeoutId);
+    });
+    timeouts = [];
+  
     start();
-}
+  }
+  
+  function check() {
+    if (wrong === 1) {
+      resetTimer();
+      game_started = false;
+      streak = 0;
+  
+      good_positions.forEach(pos => {
+        blocks[pos].classList.add('proper');
+      });
+      return;
+    }
+    if (right === mode_data[mode][0]) {
+      stopTimer();
+      streak++;
+      if (streak > max_streak) {
+        max_streak = streak;
+        document.cookie = "max-streak_thermite=" + max_streak;
+      }
+      let time = document.querySelector('.streaks .time').innerHTML;
+      if (parseFloat(time) < best_time) {
+        best_time = parseFloat(time);
+        document.cookie = "best-time_thermite=" + best_time;
+      }
+      let leaderboard = new XMLHttpRequest();
+      leaderboard.open(
+        "HEAD",
+        'streak.php?streak=' +
+          streak +
+          '&max_streak=' +
+          max_streak +
+          "&speed=" +
+          speed +
+          "&mode=" +
+          mode +
+          "&time=" +
+          time
+      );
+      leaderboard.send();
+      reset();
+    }
+  }
+  
 
-function start(){
+  function start() {
     wrong = 0;
     right = 0;
-
-    positions = range(0, Math.pow(mode, 2) - 1 );
+  
+    positions = range(0, Math.pow(mode, 2) - 1);
     shuffle(positions);
     good_positions = positions.slice(0, mode_data[mode][0]);
-
+  
     let div = document.createElement('div');
     div.classList.add('group');
     div.style.width = mode_data[mode][1];
     div.style.height = mode_data[mode][1];
     const groups = document.querySelector('.groups');
-    for(let i=0; i < positions.length; i++){
-        let group = div.cloneNode();
-        group.dataset.position = i.toString();
-        groups.appendChild(group);
+    for (let i = 0; i < positions.length; i++) {
+      let group = div.cloneNode();
+      group.dataset.position = i.toString();
+      groups.appendChild(group);
     }
-
+  
     blocks = document.querySelectorAll('.group');
     addListeners();
-
+  
     document.querySelector('.streak').innerHTML = streak;
     document.querySelector('.max_streak').innerHTML = max_streak;
     document.querySelector('.best_time').innerHTML = best_time;
-
-    timer_start = sleep(2000, function(){
-        document.querySelector('.splash').classList.add('hidden');
-        document.querySelector('.groups').classList.remove('hidden');
-
-        good_positions.forEach(pos => {
-            blocks[pos].classList.add('good');
-            blocks[pos].textContent = getRandomNumber();
-
-            speed = document.querySelector('#speed').value;
-
-            setTimeout(function() {
-                blocks[pos].style.color = 'transparent';
-                setTimeout(function() {
-                    blocks[pos].style.color = ''; // Reset to default color
-                }, speed * 1000); // Start after the specified delay
-            }, 4000);
+  
+    timer_start = sleep(2000, function () {
+      document.querySelector('.splash').classList.add('hidden');
+      document.querySelector('.groups').classList.remove('hidden');
+  
+      speed = document.querySelector('#speed').value;
+  
+      good_positions.forEach(pos => {
+        blocks[pos].classList.add('good');
+  
+        setBlockColorAndText(blocks[pos], pos);
+      });
+  
+      timer_game = sleep(4000, function () {
+        document.querySelectorAll('.group.good').forEach(el => {
+          el.classList.remove('good');
         });
-
-        timer_game = sleep(4000, function(){
-            document.querySelectorAll('.group.good').forEach(el => { el.classList.remove('good')});
-            game_started = true;
-
-            startTimer();
-            speed = document.querySelector('#speed').value;
-            timer_finish = sleep((speed * 1000), function(){
-                game_started = false;
-                wrong = 1;
-                check();
-            });
+        game_started = true;
+  
+        startTimer();
+        timer_finish = sleep(speed * 1000, function () {
+          game_started = false;
+          wrong = 1;
+          check();
         });
+      });
     });
-}
+  }
+  
+  function setBlockColorAndText(block, pos) {
+    block.textContent = getRandomNumber();
+  
+    timeouts.push(
+        setTimeout(function() {
+            blocks[pos].style.color = 'transparent';
+            setTimeout(function() {
+                blocks[pos].style.color = ''; // Reset to default color
+            }, speed * 1000); // Start after the specified delay
+        }, 4000)
+    );
+  }
+  
 
 function startTimer(){
     timerStart = new Date();
