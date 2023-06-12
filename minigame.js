@@ -226,7 +226,7 @@ function reset() {
     document.querySelector('.max_streak').innerHTML = max_streak;
     document.querySelector('.best_time').innerHTML = best_time;
   
-    timer_start = sleep(2000, function () {
+    timer_start = sleep(3000, function () {
       document.querySelector('.splash').classList.add('hidden');
       document.querySelector('.groups').classList.remove('hidden');
   
