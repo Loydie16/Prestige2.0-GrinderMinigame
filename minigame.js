@@ -1,4 +1,4 @@
-let timer_start, timer_game, timer_finish, timer_time, good_positions, wrong, right, speed, timerStart, positions;
+let timer_start, timer_game, timer_finish, timer_time, good_positions, wrong, right, speed, speed1, timerStart, positions;
 let game_started = false;
 let streak = 0;
 let max_streak = 0;
@@ -6,14 +6,18 @@ let best_time = 99.999;
 
 let timeouts = [];
 
-let mode = 5;
+let mode = 6;
 let mode_data = {};
-mode_data[5] = [8, '92px'];
-mode_data[6] = [14, '74px'];
-mode_data[7] = [18, '61px'];
-mode_data[8] = [20, '51px'];
-mode_data[9] = [24, '44px'];
-mode_data[10] = [28, '38px'];
+mode_data[5] = [5, '92px'];
+mode_data[6] = [8, '74px'];
+mode_data[7] = [14, '61px'];
+mode_data[8] = [18, '51px'];
+mode_data[9] = [20, '44px'];
+mode_data[10] = [24, '38px'];
+
+
+speed1 = parseInt(document.querySelector('#speed1').value);
+
 
 // Get max streak from cookie
 const regex = /max-streak_thermite=([\d]+)/g;
@@ -51,12 +55,19 @@ document.querySelector('#speed').addEventListener('input', function(ev){
     streak = 0;
     reset();
 });
+document.querySelector('#speed1').addEventListener('input', function(ev){
+  document.querySelector('.value').innerHTML = ev.target.value + 's';
+  speed1 = parseInt(ev.target.value);
+  streak = 0;
+  reset();
+});
 document.querySelector('#grid').addEventListener('input', function(ev){
     document.querySelector('.grid_value').innerHTML = ev.target.value + 'x' + ev.target.value;
     mode = ev.target.value;
     streak = 0;
     reset();
 });
+
 
 // Resets
 document.querySelector('.btn_again').addEventListener('click', function(){
@@ -162,6 +173,7 @@ function reset() {
       resetTimer();
       game_started = false;
       streak = 0;
+      stopTimer();
   
       good_positions.forEach(pos => {
         blocks[pos].classList.add('proper');
@@ -199,11 +211,12 @@ function reset() {
     }
   }
   
+  
 
   function start() {
     wrong = 0;
     right = 0;
-  
+    
     positions = range(0, Math.pow(mode, 2) - 1);
     shuffle(positions);
     good_positions = positions.slice(0, mode_data[mode][0]);
@@ -233,22 +246,30 @@ function reset() {
       speed = document.querySelector('#speed').value;
   
       good_positions.forEach(pos => {
+
         blocks[pos].classList.add('good');
   
         setBlockColorAndText(blocks[pos], pos);
       });
-  
-      timer_game = sleep(4000, function () {
+      startTimer();
+      timer_game = sleep(speed1*1000, function () {
         document.querySelectorAll('.group.good').forEach(el => {
           el.classList.remove('good');
         });
+        document.querySelectorAll('.group').forEach(el => {
+          el.style.cursor = 'pointer';
+        });
         game_started = true;
-  
+        resetTimer();
         startTimer();
         timer_finish = sleep(speed * 1000, function () {
           game_started = false;
           wrong = 1;
           check();
+          document.querySelectorAll('.group').forEach(el => {
+            el.style.cursor = 'not-allowed';
+          });
+          
         });
       });
     });
@@ -263,7 +284,7 @@ function reset() {
             setTimeout(function() {
                 blocks[pos].style.color = ''; // Reset to default color
             }, speed * 1000); // Start after the specified delay
-        }, 4000)
+        }, speed1*1000)
     );
   }
   
