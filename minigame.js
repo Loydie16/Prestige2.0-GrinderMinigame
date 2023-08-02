@@ -254,7 +254,7 @@ function reset() {
       startTimer();
       timer_game = sleep(speed1*1000, function () {
         document.querySelectorAll('.group.good').forEach(el => {
-          el.classList.remove('good');
+          
         });
         document.querySelectorAll('.group').forEach(el => {
           el.style.cursor = 'pointer';
