@@ -42,6 +42,7 @@ body{
     font-weight: bold;
     text-align: center;
     margin: 0 auto 10px;
+    width: 540px;
 }
 .option{
     display: inline-block;
@@ -55,10 +56,14 @@ body{
     padding: 10px 20px;
     margin: 0 auto 10px;
     border-radius: 6px;
+    
 }
+
+
 .option.grid input,
 .option.speed input{
     vertical-align: text-top;
+    cursor: pointer;
 }
 .speed_value{
     display: inline-block;
@@ -109,6 +114,7 @@ body{
     text-align: center;
     font-size: 30px;
     font-style: bold;
+    cursor: not-allowed;
 }
 .jewelry .group{
     width: 92px;
