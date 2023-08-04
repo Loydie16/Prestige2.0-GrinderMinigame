@@ -122,7 +122,7 @@ function listener(ev) {
     right++;
     clickedNumbers.push(clickedNumber);
     clickedBlock.classList.add('good');
-    clickedBlock.style.color = '';
+    //clickedBlock.style.color = '';
     expectedNumber++; // Increment the expected number for the next click
    
   } else {
