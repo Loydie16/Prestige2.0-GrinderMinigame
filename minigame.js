@@ -108,6 +108,7 @@ function getRandomNumber() {
 }
 
 let expectedNumber = 1; // Initialize the expected number to 1
+let clickedNumbers = [];
 
 function listener(ev) {
   if (!game_started) return;
@@ -117,21 +118,34 @@ function listener(ev) {
 
   if (clickedNumber === expectedNumber) {
     // User clicked the expected number
+
     right++;
+    clickedNumbers.push(clickedNumber);
     clickedBlock.classList.add('good');
-    //clickedBlock.style.color = '';
+    clickedBlock.style.color = '';
     expectedNumber++; // Increment the expected number for the next click
+   
   } else {
     // User clicked the wrong number
+    wrong++;
+    clickedBlock.classList.add('bad');
+
+    if (clickedNumbers.includes(clickedNumber)) {
+      // User clicked a number that has already been clicked
     wrong++;
     clickedBlock.classList.add('bad');
 
     blocks.forEach(block => {
         block.style.color = ''; // Reset the color to default for all blocks
       });
-  }
+      resetTimer();
+      alert("You already clicked number " +clickedNumber);
+    }
 
-  clickedBlock.removeEventListener('mousedown', listener);
+    blocks.forEach(block => {
+        block.style.color = ''; // Reset the color to default for all blocks
+      });
+  }
 
   check();
 }
