@@ -178,7 +178,7 @@ function reset() {
       clearTimeout(timeoutId);
     });
     timeouts = [];
-  
+    clickedNumbers = [];
     start();
   }
   
